@@ -1,8 +1,7 @@
 [
     {
       "origin": ["*"],
-      "method": ["GET", "POST", "PUT"],
-      "maxAgeSeconds": 3600,
-      "responseHeader": ["Content-Type", "Authorization", "X-Firebase-Storage-Version"]
+      "method": ["GET", "POST", "PUT", "DELETE"],
+      "maxAgeSeconds": 3600
     }
   ]
