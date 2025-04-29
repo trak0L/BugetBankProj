@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Import Bank Info</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    .upload-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin-top: 100px;
+    }
+
+    .upload-box {
+      border: 2px solid black;
+      padding: 30px;
+      text-align: center;
+    }
+
+    input[type="file"] {
+      margin-top: 20px;
+    }
+
+    button {
+      margin-top: 15px;
+      padding: 10px 20px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="upload-container">
+    <h1>Import Banking Info</h1>
+    <div class="upload-box">
+      <label for="excelUpload">Choose Excel File:</label>
+      <input type="file" id="excelUpload" accept=".xlsx, .xls">
+      <button onclick="handleUpload()">Upload</button>
+    </div>
+  </div>
+
+  <script>
+    function handleUpload() {
+      const fileInput = document.getElementById('excelUpload');
+      const file = fileInput.files[0];
+      if (!file) {
+        alert("Please choose a file first.");
+        return;
+      }
+
+      // For now, just show a confirmation
+      alert(`File "${file.name}" selected. You can now parse and process it.`);
+      
+      // Future: Use SheetJS or backend upload
+    }
+  </script>
+
+</body>
+</html>
