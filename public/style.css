@@ -1,0 +1,18 @@
+.bar-container {
+    width: 600px;
+    margin: 20px;
+  }
+  .bar {
+    background-color: #4CAF50;
+    height: 30px;
+    margin: 10px 0;
+    color: white;
+    text-align: right;
+    padding-right: 10px;
+    line-height: 30px;
+    width: 0;
+  }
+  .label {
+    margin-bottom: 5px;
+    font-weight: bold;
+  }
