@@ -3,7 +3,6 @@
 <head>
   <meta charset="UTF-8">
   <title>Import Bank Info</title>
-  <link rel="stylesheet" href="style.css">
   <style>
     .upload-container {
       display: flex;
@@ -37,39 +36,33 @@
     <div class="upload-box">
       <label for="excelUpload">Choose Excel File:</label>
       <input type="file" id="excelUpload" accept=".xlsx, .xls">
-      <button onclick="handleUpload()">Upload</button>
+      <button id="uploadBtn">Upload</button>
     </div>
   </div>
 
-  <!-- Firebase SDK -->
-  <script src="/__/firebase/11.6.1/firebase-app-compat.js"></script>
-  <script src="/__/firebase/11.6.1/firebase-storage-compat.js"></script>
-  <script src="firebase-config.js"></script>
-  <script>
-    // Wait until Firebase has initialized
-    window.addEventListener('DOMContentLoaded', () => {
-      const storage = firebase.storage();
+  <!-- Firebase SDK Modules -->
+  <script type="module">
+    import { ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-storage.js";
+    import { storage } from './firebase-config.js';
 
-      window.handleUpload = async function () {
-        const fileInput = document.getElementById('excelUpload');
-        const file = fileInput.files[0];
-        if (!file) {
-          alert("Please choose a file first.");
-          return;
-        }
+    document.getElementById("uploadBtn").addEventListener("click", async () => {
+      const fileInput = document.getElementById('excelUpload');
+      const file = fileInput.files[0];
+      if (!file) {
+        alert("Please choose a file first.");
+        return;
+      }
 
-        const storageRef = storage.ref();
-        const fileRef = storageRef.child('uploads/' + file.name);
+      const fileRef = ref(storage, 'uploads/' + file.name);
 
-        try {
-          const snapshot = await fileRef.put(file);
-          const url = await snapshot.ref.getDownloadURL();
-          alert(`File uploaded successfully!\nDownload URL:\n${url}`);
-        } catch (error) {
-          console.error("Upload failed:", error);
-          alert("Upload failed. Check the console for details.");
-        }
-      };
+      try {
+        const snapshot = await uploadBytes(fileRef, file);
+        const url = await getDownloadURL(fileRef);
+        alert(`File uploaded successfully! Download URL:\n${url}`);
+      } catch (error) {
+        console.error("Upload failed:", error);
+        alert("Upload failed. See console.");
+      }
     });
   </script>
 
