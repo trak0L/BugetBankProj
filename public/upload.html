@@ -40,10 +40,14 @@
     </div>
   </div>
 
-  <!-- Firebase SDK Modules -->
+  <!-- Firebase SDK (modular) -->
   <script type="module">
     import { ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-storage.js";
-    import { storage } from './firebase-config.js';
+    import { app } from './firebase-config.js';
+    import { getStorage } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-storage.js";
+
+    // If you need to specify the bucket explicitly:
+    const storage = getStorage(app, "gs://budget-banking-proj.appspot.com");
 
     document.getElementById("uploadBtn").addEventListener("click", async () => {
       const fileInput = document.getElementById('excelUpload');
@@ -58,10 +62,10 @@
       try {
         const snapshot = await uploadBytes(fileRef, file);
         const url = await getDownloadURL(fileRef);
-        alert(`File uploaded successfully! Download URL:\n${url}`);
+        alert(`✅ File uploaded successfully!\n\n🔗 ${url}`);
       } catch (error) {
-        console.error("Upload failed:", error);
-        alert("Upload failed. See console.");
+        console.error("❌ Upload failed:", error);
+        alert("Upload failed. See console for details.");
       }
     });
   </script>
