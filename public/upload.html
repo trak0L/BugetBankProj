@@ -41,20 +41,37 @@
     </div>
   </div>
 
-  <script>
-    function handleUpload() {
-      const fileInput = document.getElementById('excelUpload');
-      const file = fileInput.files[0];
-      if (!file) {
-        alert("Please choose a file first.");
-        return;
-      }
+  <!-- Firebase SDK -->
+  <script src="/__/firebase/11.6.1/firebase-app-compat.js"></script>
+  <script src="/__/firebase/11.6.1/firebase-storage-compat.js"></script>
+  <!-- <script src="/__/firebase/init.js?useEmulator=true"></script> -->
 
-      // For now, just show a confirmation
-      alert(`File "${file.name}" selected. You can now parse and process it.`);
-      
-      // Future: Use SheetJS or backend upload
-    }
+  <script>
+    // Wait until Firebase has initialized
+    window.addEventListener('DOMContentLoaded', () => {
+      const storage = firebase.storage();
+
+      window.handleUpload = async function () {
+        const fileInput = document.getElementById('excelUpload');
+        const file = fileInput.files[0];
+        if (!file) {
+          alert("Please choose a file first.");
+          return;
+        }
+
+        const storageRef = storage.ref();
+        const fileRef = storageRef.child('uploads/' + file.name);
+
+        try {
+          const snapshot = await fileRef.put(file);
+          const url = await snapshot.ref.getDownloadURL();
+          alert(`File uploaded successfully!\nDownload URL:\n${url}`);
+        } catch (error) {
+          console.error("Upload failed:", error);
+          alert("Upload failed. Check the console for details.");
+        }
+      };
+    });
   </script>
 
 </body>
