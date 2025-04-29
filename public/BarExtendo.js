@@ -1,12 +1,17 @@
 window.onload = function () {
   const data = [
-    { label: "Apples", value: 70 },
-    { label: "Bananas", value: 40 },
-    { label: "Cherries", value: 90 },
-    { label: "Dates", value: 50 }
+    { label: "Groceries", value: 45 },
+    { label: "Streaming", value: 15 },
+    { label: "New Shoes", value: 75 },  // flagged
+    { label: "Dining Out", value: 60 },
+    { label: "Gaming", value: 85 }      // flagged
   ];
 
   const graphContainer = document.getElementById('graph');
+  const flaggedContainer = document.getElementById('flagged');
+  const spendingLimit = 60;
+
+  const flagged = [];
 
   data.forEach(item => {
     const label = document.createElement('div');
@@ -21,7 +26,7 @@ window.onload = function () {
 
     let currentWidth = 0;
     const targetWidth = item.value;
-    const speed = 5;
+    const speed = 1;
 
     const interval = setInterval(() => {
       if (currentWidth >= targetWidth) {
@@ -33,5 +38,21 @@ window.onload = function () {
         bar.innerText = currentWidth + '%';
       }
     }, speed);
+
+    if (item.value > spendingLimit) {
+      flagged.push(`${item.label} - $${item.value}`);
+    }
   });
+
+  if (flagged.length > 0) {
+    const heading = document.createElement('div');
+    heading.innerText = "⚠️ Irresponsible Purchases:";
+    flaggedContainer.appendChild(heading);
+
+    flagged.forEach(item => {
+      const entry = document.createElement('div');
+      entry.innerText = "• " + item;
+      flaggedContainer.appendChild(entry);
+    });
+  }
 };
