@@ -2,7 +2,7 @@
 <html>
 <head>
   <meta charset="UTF-8">
-  <title>Import Bank Info</title>
+  <title>Import CSV Data</title>
   <style>
     .upload-container {
       display: flex;
@@ -32,32 +32,55 @@
 <body>
 
   <div class="upload-container">
-    <h1>Import Banking Info</h1>
+    <h1>Import CSV Data</h1>
     <div class="upload-box">
-      <label for="excelUpload">Choose Excel File:</label>
-      <input type="file" onchange="uploadFile(this.file)" accept=".xlsx, .xls">
-      <button id="uploadBtn">Upload</button>
+      <label for="csvUpload">Choose CSV File:</label>
+      <input type="file" id="csvUpload" onchange="uploadFile(this.files)" accept=".csv">
     </div>
   </div>
 
-  <!-- Firebase SDK (modular) -->
   <script type="module">
-// Suggested code may be subject to a license. Learn more: ~LicenseLog:4240434498.
-    function uploadFile(files) {
-      const storageRef = firebase.storage().ref();
-      const uploadRef = storageRef.child('Test Upload.xlsx');
+    import { app, storage } from "./firebase-config.js";
+    import { ref, uploadBytesResumable, getDownloadURL } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-storage.js";
 
+    window.uploadFile = async function(files) {
       const file = files.item(0);
 
-      const task = uploadRef.put(file)
+      if (file && file.type === 'text/csv') {
+        console.log("Storage object:", storage); // Added for debugging
+        const storageRef = ref(storage, `csv_uploads/${file.name}`);
+        const uploadTask = uploadBytesResumable(storageRef, file);
 
-      task.then(snapshot => {
-        console.log(snapshot)
-        const url = snapshot.downloadURL
-        document.querySelector('#imgUpload')
-      })
-
-    }
+        uploadTask.on('state_changed',
+          (snapshot) => {
+            const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+            console.log('Upload is ' + progress + '% done');
+            switch (snapshot.state) {
+              case 'paused':
+                console.log('Upload is paused');
+                break;
+              case 'running':
+                console.log('Upload is running');
+                break;
+            }
+          },
+          (error) => {
+            console.error("Error uploading file:", error);
+          },
+          () => {
+            getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
+              console.log('File available at', downloadURL);
+              alert('CSV file uploaded successfully! Download URL: ' + downloadURL);
+              // Further processing of downloadURL can go here
+            });
+          }
+        );
+      } else if (file) {
+        alert('Please select a valid .csv file.');
+      } else {
+        alert('No file selected.');
+      }
+    };
   </script>
 
 </body>
