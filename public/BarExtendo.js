@@ -26,7 +26,7 @@ window.onload = function () {
 
     let currentWidth = 0;
     const targetWidth = item.value;
-    const speed = 1;
+    const speed = 20;
 
     const interval = setInterval(() => {
       if (currentWidth >= targetWidth) {

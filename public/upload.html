@@ -4,6 +4,35 @@
   <meta charset="UTF-8">
   <title>Import CSV Data</title>
   <style>
+
+    .back-button-container {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+    }
+
+    .back-button {
+      display: inline-flex;
+      align-items: center;
+      padding: 8px 15px;
+      text-decoration: none;
+      color: black;
+      border: 1px solid black;
+      border-radius: 5px;
+      background-color: white;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+
+    .back-button:hover {
+      background-color: lightgray;
+    }
+
+    .back-arrow {
+      margin-right: 5px;
+      font-size: 1em;
+    }
+
     .upload-container {
       display: flex;
       flex-direction: column;
@@ -37,6 +66,12 @@
       <label for="csvUpload">Choose CSV File:</label>
       <input type="file" id="csvUpload" onchange="uploadFile(this.files)" accept=".csv">
     </div>
+  </div>
+
+  <div class="back-button-container">
+    <a href="index.html" class="back-button">
+      <span class="back-arrow">←</span> Back
+    </a>
   </div>
 
   <script type="module">
