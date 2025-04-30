@@ -35,39 +35,29 @@
     <h1>Import Banking Info</h1>
     <div class="upload-box">
       <label for="excelUpload">Choose Excel File:</label>
-      <input type="file" id="excelUpload" accept=".xlsx, .xls">
+      <input type="file" onchange="uploadFile(this.files)" accept=".xlsx, .xls">
       <button id="uploadBtn">Upload</button>
     </div>
   </div>
 
   <!-- Firebase SDK (modular) -->
   <script type="module">
-    import { ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-storage.js";
-    import { app } from './firebase-config.js';
-    import { getStorage } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-storage.js";
+// Suggested code may be subject to a license. Learn more: ~LicenseLog:4240434498.
+    function uploadFile(files) {
+      const storageRef = firebase.storage().ref();
+      const uploadRef = storageRef.child('Test Upload.xlsx');
 
-    // If you need to specify the bucket explicitly:
-    const storage = getStorage(app, "gs://budget-banking-proj.appspot.com");
+      const file = files.item(0);
 
-    document.getElementById("uploadBtn").addEventListener("click", async () => {
-      const fileInput = document.getElementById('excelUpload');
-      const file = fileInput.files[0];
-      if (!file) {
-        alert("Please choose a file first.");
-        return;
-      }
+      const task = uploadRef.put(file)
 
-      const fileRef = ref(storage, 'uploads/' + file.name);
+      task.then(snapshot => {
+        console.log(snapshot)
+        const url = snapshot.downloadURL
+        document.querySelector('#imgUpload')
+      })
 
-      try {
-        const snapshot = await uploadBytes(fileRef, file);
-        const url = await getDownloadURL(fileRef);
-        alert(`✅ File uploaded successfully!\n\n🔗 ${url}`);
-      } catch (error) {
-        console.error("❌ Upload failed:", error);
-        alert("Upload failed. See console for details.");
-      }
-    });
+    }
   </script>
 
 </body>
