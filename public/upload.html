@@ -1,122 +1,170 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <meta charset="UTF-8">
-  <title>Import CSV Data</title>
-  <style>
+    <meta charset="UTF-8">
+    <title>Import CSV Data</title>
+    <style>
+        .back-button-container {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+        }
 
-    .back-button-container {
-      position: absolute;
-      top: 10px;
-      left: 10px;
-    }
+        .back-button {
+            display: inline-flex;
+            align-items: center;
+            padding: 8px 15px;
+            text-decoration: none;
+            color: black;
+            border: 1px solid black;
+            border-radius: 5px;
+            background-color: white;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
 
-    .back-button {
-      display: inline-flex;
-      align-items: center;
-      padding: 8px 15px;
-      text-decoration: none;
-      color: black;
-      border: 1px solid black;
-      border-radius: 5px;
-      background-color: white;
-      cursor: pointer;
-      transition: background-color 0.3s;
-    }
+        .back-button:hover {
+            background-color: lightgray;
+        }
 
-    .back-button:hover {
-      background-color: lightgray;
-    }
+        .back-arrow {
+            margin-right: 5px;
+            font-size: 1em;
+        }
 
-    .back-arrow {
-      margin-right: 5px;
-      font-size: 1em;
-    }
+        .upload-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-top: 100px;
+        }
 
-    .upload-container {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      margin-top: 100px;
-    }
+        .upload-box {
+            border: 2px solid black;
+            padding: 30px;
+            text-align: center;
+        }
 
-    .upload-box {
-      border: 2px solid black;
-      padding: 30px;
-      text-align: center;
-    }
+        input[type="file"] {
+            margin-top: 20px;
+        }
 
-    input[type="file"] {
-      margin-top: 20px;
-    }
-
-    button {
-      margin-top: 15px;
-      padding: 10px 20px;
-      font-size: 16px;
-      cursor: pointer;
-    }
-  </style>
+        button {
+            margin-top: 15px;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+    </style>
 </head>
 <body>
 
-  <div class="upload-container">
-    <h1>Import CSV Data</h1>
-    <div class="upload-box">
-      <label for="csvUpload">Choose CSV File:</label>
-      <input type="file" id="csvUpload" onchange="uploadFile(this.files)" accept=".csv">
+    <div class="upload-container">
+        <h1>Import CSV Data</h1>
+        <div class="upload-box">
+            <label for="csvUpload">Choose CSV File:</label>
+            <input type="file" id="csvUpload" onchange="uploadFile(this.files)" accept=".csv">
+        </div>
     </div>
-  </div>
 
-  <div class="back-button-container">
-    <a href="index.html" class="back-button">
-      <span class="back-arrow">←</span> Back
-    </a>
-  </div>
+    <div class="back-button-container">
+        <a href="index.html" class="back-button">
+            <span class="back-arrow">←</span> Back
+        </a>
+    </div>
 
-  <script type="module">
-    import { app, storage } from "./firebase-config.js";
-    import { ref, uploadBytesResumable, getDownloadURL } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-storage.js";
+    <script type="module">
+        import { app, storage } from "./firebase-config.js";
+        import { ref, uploadBytesResumable, getDownloadURL } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-storage.js";
+        import { getDatabase, set, ref as dbRef } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-database.js";
 
-    window.uploadFile = async function(files) {
-      const file = files.item(0);
+        const database = getDatabase(app);
 
-      if (file && file.type === 'text/csv') {
-        console.log("Storage object:", storage); // Added for debugging
-        const storageRef = ref(storage, `csv_uploads/${file.name}`);
-        const uploadTask = uploadBytesResumable(storageRef, file);
+        // Function to parse CSV data to JSON
+        function parseCSVToJson(csvText) {
+            const lines = csvText.trim().split('\n');
+            const header = lines[0].split(',');
+            const data = [];
 
-        uploadTask.on('state_changed',
-          (snapshot) => {
-            const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-            console.log('Upload is ' + progress + '% done');
-            switch (snapshot.state) {
-              case 'paused':
-                console.log('Upload is paused');
-                break;
-              case 'running':
-                console.log('Upload is running');
-                break;
+            for (let i = 1; i < lines.length; i++) {
+                const currentLine = lines[i].split(',');
+                if (currentLine.length === header.length) {
+                    const item = {};
+                    for (let j = 0; j < header.length; j++) {
+                        let value = currentLine[j].trim();
+                         if(!isNaN(value)){
+                            value = Number(value);
+                        }
+                        item[header[j].trim()] = value;
+                    }
+                    data.push(item);
+                }
+                 else{
+                    console.warn(`Skipping line ${i+1} because it has ${currentLine.length} values, expected ${header.length}.`)
+                }
             }
-          },
-          (error) => {
-            console.error("Error uploading file:", error);
-          },
-          () => {
-            getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
-              console.log('File available at', downloadURL);
-              alert('CSV file uploaded successfully! Download URL: ' + downloadURL);
-              // Further processing of downloadURL can go here
-            });
-          }
-        );
-      } else if (file) {
-        alert('Please select a valid .csv file.');
-      } else {
-        alert('No file selected.');
-      }
-    };
-  </script>
+            return JSON.stringify(data); // Convert to JSON string
+        }
 
+        window.uploadFile = async function (files) {
+            const file = files.item(0);
+
+            if (file && file.type === 'text/csv') {
+                const reader = new FileReader();
+
+                reader.onload = async (event) => {
+                    const csvText = event.target.result;
+                    const jsonData = parseCSVToJson(csvText); // Parse CSV to JSON
+
+                    const storageRef = ref(storage, `json_uploads/${file.name.replace('.csv', '.json')}`); //change name
+                    const uploadTask = uploadBytesResumable(storageRef, new Blob([jsonData], { type: 'application/json' })); //use json
+
+                    uploadTask.on('state_changed',
+                        (snapshot) => {
+                            const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+                            console.log('Upload is ' + progress + '% done');
+                            switch (snapshot.state) {
+                                case 'paused':
+                                    console.log('Upload is paused');
+                                    break;
+                                case 'running':
+                                    console.log('Upload is running');
+                                    break;
+                            }
+                        },
+                        (error) => {
+                            console.error("Error uploading file:", error);
+                            alert('Error uploading file.');
+                        },
+                        async () => {
+                            try {
+                                const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
+                                console.log('File available at', downloadURL);
+
+                                // Store the download URL in the Realtime Database
+                                const dbRefKey = dbRef(database, 'json_data_url'); //changed this
+                                await set(dbRefKey, { url: downloadURL });
+
+                                alert('CSV file converted and uploaded successfully! JSON URL stored in database.');
+                            } catch (error) {
+                                console.error("Error getting download URL or updating database:", error);
+                                alert('Error uploading file or storing URL.');
+                            }
+                        }
+                    );
+                };
+
+                reader.onerror = () => {
+                    alert('Error reading file.');
+                };
+
+                reader.readAsText(file); // Read the file as text
+            } else if (file) {
+                alert('Please select a valid .csv file.');
+            } else {
+                alert('No file selected.');
+            }
+        };
+    </script>
 </body>
 </html>
