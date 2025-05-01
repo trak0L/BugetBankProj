@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Needs and Wants</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .selection-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-top: 50px;
+        }
+        .purchase-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+            width: 300px;
+        }
+        .selection-buttons {
+            display: flex;
+            gap: 10px;
+        }
+        .need-button, .want-button {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        .need-button {
+            background-color: #4CAF50; /* Green */
+            color: white;
+        }
+        .need-button:hover {
+            background-color: #367c39;
+        }
+        .want-button {
+            background-color: #008CBA; /* Blue */
+            color: white;
+        }
+        .want-button:hover {
+            background-color: #00688B;
+        }
+        .selected {
+            font-weight: bold;
+            text-decoration: underline;
+        }
+        .need {
+            color: #4CAF50; /* Green */
+        }
+        .want {
+            color: #008CBA; /* Blue */
+        }
+    </style>
+</head>
+<body>
+    <div class="selection-container">
+        <h1>Needs and Wants</h1>
+        <div id="purchase-list">
+            </div>
+        <button onclick="window.location.href='postLogin.html'">Back to Budget</button>
+    </div>
+
+    <script>
+        const purchaseData = [
+            { label: "Groceries", value: 45 },
+            { label: "Streaming", value: 15 },
+            { label: "New Shoes", value: 75 },
+            { label: "Dining Out", value: 60 },
+            { label: "Gaming", value: 85 }
+        ];
+
+        const purchaseList = document.getElementById('purchase-list');
+
+        purchaseData.forEach(item => {
+            const purchaseItem = document.createElement('div');
+            purchaseItem.className = 'purchase-item';
+            purchaseItem.innerHTML = `
+                <span class="label">${item.label} - $${item.value}</span>
+                <div class="selection-buttons">
+                    <button class="need-button" data-label="${item.label}">Need</button>
+                    <button class="want-button" data-label="${item.label}">Want</button>
+                </div>
+            `;
+            purchaseList.appendChild(purchaseItem);
+        });
+
+        purchaseList.addEventListener('click', (event) => {
+            const clickedButton = event.target;
+            if (clickedButton.classList.contains('need-button') || clickedButton.classList.contains('want-button')) {
+                const label = clickedButton.dataset.label;
+                const itemLabelSpan = clickedButton.parentElement.previousElementSibling;
+
+                if (clickedButton.classList.contains('need-button')) {
+                    itemLabelSpan.classList.add('selected', 'need');
+                    itemLabelSpan.classList.remove('want');
+                } else {
+                    itemLabelSpan.classList.add('selected', 'want');
+                    itemLabelSpan.classList.remove('need');
+                }
+            }
+        });
+    </script>
+</body>
+</html>
